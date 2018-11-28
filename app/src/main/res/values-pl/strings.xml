@@ -3,4 +3,6 @@
     <string name="username">Nazwa użytkownika</string>
     <string name="password">Hasło</string>
     <string name="sign_in">Zaloguj</string>
+    <string name="username_empty_error">Podaj nazwę użytkownika!</string>
+    <string name="password_empty_error">Podaj hasło!</string>
 </resources>
