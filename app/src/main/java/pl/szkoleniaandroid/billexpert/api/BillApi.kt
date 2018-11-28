@@ -17,6 +17,8 @@ interface BillApi {
     ): Call<LoginResponse>
 }
 
-class LoginResponse(
+data class LoginResponse(
+    val objectId: String,
+    val username: String,
     val sessionToken: String
 )

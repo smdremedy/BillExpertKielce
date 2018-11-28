@@ -4,6 +4,7 @@ import android.os.AsyncTask
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
+import android.preference.PreferenceManager
 import android.util.Log
 import android.view.View
 import androidx.databinding.*
@@ -14,11 +15,14 @@ import okhttp3.logging.HttpLoggingInterceptor
 import pl.szkoleniaandroid.billexpert.api.BillApi
 import pl.szkoleniaandroid.billexpert.api.LoginResponse
 import pl.szkoleniaandroid.billexpert.databinding.ActivityLoginBinding
+import pl.szkoleniaandroid.billexpert.session.SessionRepository
+import pl.szkoleniaandroid.billexpert.session.SharedPrefsSessionRepository
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+import timber.log.Timber
 
 typealias ObservableString = ObservableField<String>
 
@@ -28,18 +32,25 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val sessionRepository = SharedPrefsSessionRepository(
+            PreferenceManager.getDefaultSharedPreferences(applicationContext)
+        )
+
         binding = DataBindingUtil.setContentView(this, R.layout.activity_login)
-        binding.viewmodel = LoginViewModel()
+        binding.viewmodel = LoginViewModel(
+            sessionRepository
+        )
     }
 }
 
-class LoginViewModel : ViewModel() {
+class LoginViewModel(private val sessionRepository: SessionRepository) : ViewModel() {
 
     val usernameError = ObservableInt(0)
     val username = ObservableField<String>("test")
     var password = ObservableString("pass")
     val passwordError = ObservableInt(0)
     val inProgress = ObservableBoolean(false)
+
 
 //    var task: AsyncTask<String, Int, Boolean>? = null
 
@@ -59,6 +70,7 @@ class LoginViewModel : ViewModel() {
 
     override fun onCleared() {
         super.onCleared()
+
 //        task?.cancel(true)
     }
 
@@ -98,6 +110,17 @@ class LoginViewModel : ViewModel() {
             }
 
             override fun onResponse(call: Call<LoginResponse>, response: Response<LoginResponse>) {
+                if (response.isSuccessful) {
+                    val body: LoginResponse = response.body()!!
+                    Timber.d("Response:$body")
+                    sessionRepository.saveUser(body.objectId, body.sessionToken)
+
+                    //GO TO BILLS!!
+                } else {
+
+
+                    val error = response.errorBody()
+                }
             }
 
         })
