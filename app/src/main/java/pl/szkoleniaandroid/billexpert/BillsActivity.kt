@@ -7,14 +7,23 @@ import android.view.Menu
 import android.view.MenuItem
 import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModel
 
 import kotlinx.android.synthetic.main.activity_bills.*
+import pl.szkoleniaandroid.billexpert.api.BillsResponse
+import pl.szkoleniaandroid.billexpert.databinding.ActivityBillsBinding
 import pl.szkoleniaandroid.billexpert.session.SessionRepository
 import pl.szkoleniaandroid.billexpert.session.SharedPrefsSessionRepository
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import timber.log.Timber
 
 class BillsActivity : AppCompatActivity() {
 
     private lateinit var sessionRepository: SessionRepository
+
+    lateinit var binding: ActivityBillsBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,6 +31,8 @@ class BillsActivity : AppCompatActivity() {
         sessionRepository = SharedPrefsSessionRepository(
             android.preference.PreferenceManager.getDefaultSharedPreferences(applicationContext)
         )
+
+
 
         if (sessionRepository.isLoggedIn()) {
             setContentView(R.layout.activity_bills)
@@ -52,6 +63,7 @@ class BillsActivity : AppCompatActivity() {
                 return true
             }
             R.id.action_refresh -> {
+                refreshBills()
                 return true
             }
             R.id.action_logout -> {
@@ -62,5 +74,28 @@ class BillsActivity : AppCompatActivity() {
             else -> super.onOptionsItemSelected(item)
         }
     }
+
+    private fun refreshBills() {
+
+        val call = getBillApi().getBills(sessionRepository.getToken())
+        call.enqueue(object : Callback<BillsResponse> {
+            override fun onFailure(call: Call<BillsResponse>, t: Throwable) {
+            }
+
+            override fun onResponse(call: Call<BillsResponse>, response: Response<BillsResponse>) {
+                if (response.isSuccessful) {
+                    val billsResponse = response.body()!!
+                    billsResponse.results.forEach { bill ->
+                        Timber.d(bill.toString())
+                    }
+                }
+            }
+
+        })
+    }
+
+}
+
+class BillsViewModel : ViewModel() {
 
 }

@@ -40,8 +40,11 @@ class LoginActivity : AppCompatActivity() {
         )
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_login)
+
+
+
         val loginViewModel = LoginViewModel(
-            sessionRepository
+            sessionRepository, getBillApi()
         )
         binding.viewmodel = loginViewModel
         loginViewModel.goToBillsLiveData.observe(this, Observer<Event<Unit>> {
@@ -61,7 +64,11 @@ class LoginActivity : AppCompatActivity() {
     }
 }
 
-class LoginViewModel(private val sessionRepository: SessionRepository) : ViewModel() {
+
+class LoginViewModel(
+    private val sessionRepository: SessionRepository,
+    private val billApi: BillApi
+) : ViewModel() {
 
     val usernameError = ObservableInt(0)
     val username = ObservableField<String>("test")
@@ -111,21 +118,7 @@ class LoginViewModel(private val sessionRepository: SessionRepository) : ViewMod
 
         inProgress.set(true)
 
-        val interceptor = HttpLoggingInterceptor()
-        interceptor.level = HttpLoggingInterceptor.Level.BODY
 
-        val client = OkHttpClient.Builder()
-            .addInterceptor(interceptor)
-            .build()
-
-
-        val retrofit: Retrofit = Retrofit.Builder()
-            .baseUrl("https://parseapi.back4app.com")
-            .addConverterFactory(MoshiConverterFactory.create())
-            .client(client)
-            .build()
-
-        val billApi = retrofit.create(BillApi::class.java)
         val call = billApi.getLogin(username, password)
 
         call.enqueue(object : Callback<LoginResponse> {
@@ -203,5 +196,5 @@ fun intErrorAdapter(view: TextInputLayout, errorId: Int) {
 
 @BindingAdapter("visible")
 fun visible(view: ProgressBar, visible: Boolean) {
-    view.visibility = if(visible) View.VISIBLE else View.GONE
+    view.visibility = if (visible) View.VISIBLE else View.GONE
 }
