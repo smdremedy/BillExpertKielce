@@ -3,15 +3,22 @@ package pl.szkoleniaandroid.billexpert
 import android.content.Intent
 import android.os.Bundle
 import android.preference.PreferenceManager
+import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
+import android.view.ViewGroup
 import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModel
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 
 import kotlinx.android.synthetic.main.activity_bills.*
+import pl.szkoleniaandroid.billexpert.api.Bill
 import pl.szkoleniaandroid.billexpert.api.BillsResponse
 import pl.szkoleniaandroid.billexpert.databinding.ActivityBillsBinding
+import pl.szkoleniaandroid.billexpert.databinding.BillItemBinding
 import pl.szkoleniaandroid.billexpert.session.SessionRepository
 import pl.szkoleniaandroid.billexpert.session.SharedPrefsSessionRepository
 import retrofit2.Call
@@ -24,6 +31,7 @@ class BillsActivity : AppCompatActivity() {
     private lateinit var sessionRepository: SessionRepository
 
     lateinit var binding: ActivityBillsBinding
+    val billsAdapter = BillsAdapter()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,13 +43,16 @@ class BillsActivity : AppCompatActivity() {
 
 
         if (sessionRepository.isLoggedIn()) {
-            setContentView(R.layout.activity_bills)
+            binding = DataBindingUtil.setContentView(this, R.layout.activity_bills)
             setSupportActionBar(toolbar)
 
             fab.setOnClickListener { view ->
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show()
             }
+            binding.billsContent.billsRecyclerView.adapter = billsAdapter
+            binding.billsContent.billsRecyclerView.layoutManager = LinearLayoutManager(this)
+
         } else {
             goToLogin()
         }
@@ -88,11 +99,41 @@ class BillsActivity : AppCompatActivity() {
                     billsResponse.results.forEach { bill ->
                         Timber.d(bill.toString())
                     }
+                    billsAdapter.setData(billsResponse.results)
                 }
             }
 
         })
     }
+
+}
+
+
+class BillsAdapter : RecyclerView.Adapter<ViewHolder>() {
+
+    val bills = mutableListOf<Bill>()
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val inflater = LayoutInflater.from(parent.context)
+        return ViewHolder(BillItemBinding.inflate(inflater, parent, false))
+    }
+
+    override fun getItemCount(): Int {
+        return bills.count()
+    }
+
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+    }
+
+    fun setData(results: List<Bill>) {
+        bills.clear()
+        bills.addAll(results)
+        notifyDataSetChanged()
+    }
+
+}
+
+class ViewHolder(binding: BillItemBinding) : RecyclerView.ViewHolder(binding.root) {
 
 }
 
