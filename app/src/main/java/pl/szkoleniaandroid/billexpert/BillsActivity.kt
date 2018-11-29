@@ -10,11 +10,15 @@ import android.view.ViewGroup
 import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil
+import androidx.databinding.ObservableArrayList
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
 import kotlinx.android.synthetic.main.activity_bills.*
+import me.tatarka.bindingcollectionadapter2.ItemBinding
 import pl.szkoleniaandroid.billexpert.api.Bill
 import pl.szkoleniaandroid.billexpert.api.BillsResponse
 import pl.szkoleniaandroid.billexpert.databinding.ActivityBillsBinding
@@ -26,12 +30,19 @@ import retrofit2.Callback
 import retrofit2.Response
 import timber.log.Timber
 
+interface OnBillClicked {
+    fun billClicked(bill: Bill)
+}
+
+
 class BillsActivity : AppCompatActivity() {
 
     private lateinit var sessionRepository: SessionRepository
 
     lateinit var binding: ActivityBillsBinding
     val billsAdapter = BillsAdapter()
+
+    lateinit var viewModel: BillsViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,8 +61,22 @@ class BillsActivity : AppCompatActivity() {
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show()
             }
-            binding.billsContent.billsRecyclerView.adapter = billsAdapter
-            binding.billsContent.billsRecyclerView.layoutManager = LinearLayoutManager(this)
+            viewModel = BillsViewModel()
+            viewModel.showBillLiveData.observe(this, Observer {
+                if(!it.consumed) {
+                    val bill = it.consume()
+                    //TODO show bill
+                    val intent = Intent(this,
+                        DetailsActivity::class.java)
+                    intent.putExtra("bill", bill)
+                    startActivity(intent)
+                }
+            })
+
+//            binding.billsContent.billsRecyclerView.adapter = billsAdapter
+//            binding.billsContent.billsRecyclerView.layoutManager = LinearLayoutManager(this)
+
+            binding.viewmodel = viewModel
 
         } else {
             goToLogin()
@@ -99,7 +124,9 @@ class BillsActivity : AppCompatActivity() {
                     billsResponse.results.forEach { bill ->
                         Timber.d(bill.toString())
                     }
-                    billsAdapter.setData(billsResponse.results)
+                    viewModel.bills.clear()
+                    viewModel.bills.addAll(billsResponse.results)
+                    //billsAdapter.setData(billsResponse.results)
                 }
             }
 
@@ -140,4 +167,13 @@ class ViewHolder(val binding: BillItemBinding) : RecyclerView.ViewHolder(binding
 
 class BillsViewModel : ViewModel() {
 
+    val showBillLiveData = MutableLiveData<Event<Bill>>()
+
+    val bills = ObservableArrayList<Bill>()
+    val itemBinding = ItemBinding.of<Bill>(BR.item, R.layout.bill_item)
+        .bindExtra(BR.listener, object: OnBillClicked {
+            override fun billClicked(bill: Bill) {
+                showBillLiveData.value = Event(bill)
+            }
+        })
 }

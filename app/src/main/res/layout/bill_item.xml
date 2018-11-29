@@ -5,9 +5,12 @@
 
         <variable name="item"
                   type="pl.szkoleniaandroid.billexpert.api.Bill"/>
+
+        <variable name="listener" type="pl.szkoleniaandroid.billexpert.OnBillClicked"/>
     </data>
     <androidx.cardview.widget.CardView
             app:cardElevation="10dp"
+            android:onClick="@{()->listener.billClicked(item)}"
             android:layout_margin="8dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">

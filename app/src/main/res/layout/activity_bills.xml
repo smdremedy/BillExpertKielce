@@ -3,6 +3,9 @@
         xmlns:tools="http://schemas.android.com/tools">
     <data>
 
+        <variable name="viewmodel"
+                  type="pl.szkoleniaandroid.billexpert.BillsViewModel"/>
+
     </data>
     <androidx.coordinatorlayout.widget.CoordinatorLayout
             android:layout_width="match_parent"
@@ -23,7 +26,9 @@
 
         </com.google.android.material.appbar.AppBarLayout>
 
-        <include android:id="@+id/bills_content" layout="@layout/content_bills"/>
+        <include android:id="@+id/bills_content"
+                 app:viewmodel="@{viewmodel}"
+                 layout="@layout/content_bills"/>
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/fab"
