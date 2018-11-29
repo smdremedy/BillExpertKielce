@@ -58,8 +58,7 @@ class BillsActivity : AppCompatActivity() {
             setSupportActionBar(toolbar)
 
             fab.setOnClickListener { view ->
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show()
+               goToAdd()
             }
             viewModel = BillsViewModel()
             viewModel.showBillLiveData.observe(this, Observer {
@@ -83,6 +82,12 @@ class BillsActivity : AppCompatActivity() {
         }
     }
 
+    private fun goToAdd() {
+        val intent = Intent(this,
+            DetailsActivity::class.java)
+        startActivity(intent)
+    }
+
     private fun goToLogin() {
         startActivity(Intent(this, LoginActivity::class.java))
         finish()
@@ -96,6 +101,7 @@ class BillsActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_add -> {
+                goToAdd()
                 return true
             }
             R.id.action_refresh -> {

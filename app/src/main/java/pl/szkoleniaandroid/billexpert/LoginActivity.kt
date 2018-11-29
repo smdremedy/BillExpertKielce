@@ -195,6 +195,6 @@ fun intErrorAdapter(view: TextInputLayout, errorId: Int) {
 }
 
 @BindingAdapter("visible")
-fun visible(view: ProgressBar, visible: Boolean) {
+fun visible(view: View, visible: Boolean) {
     view.visibility = if (visible) View.VISIBLE else View.GONE
 }
