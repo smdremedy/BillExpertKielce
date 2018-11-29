@@ -57,7 +57,9 @@ data class Bill(
     val category: Category = Category.OTHER,
     val comment: String = "",
     val objectId: String = ""
-) : Serializable
+) : Serializable {
+    fun getCategoryUrl()  = "file:///android_asset/${category.name.toLowerCase()}.png"
+}
 
 data class LoginResponse(
     val objectId: String,

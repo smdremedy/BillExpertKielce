@@ -123,6 +123,7 @@ class BillsAdapter : RecyclerView.Adapter<ViewHolder>() {
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        holder.binding.item = bills[position]
     }
 
     fun setData(results: List<Bill>) {
@@ -133,7 +134,7 @@ class BillsAdapter : RecyclerView.Adapter<ViewHolder>() {
 
 }
 
-class ViewHolder(binding: BillItemBinding) : RecyclerView.ViewHolder(binding.root) {
+class ViewHolder(val binding: BillItemBinding) : RecyclerView.ViewHolder(binding.root) {
 
 }
 
