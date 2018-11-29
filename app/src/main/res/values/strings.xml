@@ -5,8 +5,9 @@
     <string name="sign_in">Sign In</string>
     <string name="username_empty_error">Username can\'t be empty!</string>
     <string name="password_empty_error">Password can\'t be empty!</string>
-    <string name="title_activity_bills">BillsActivity</string>
     <string name="add">Add</string>
     <string name="refresh">Refresh</string>
     <string name="logout">Logout</string>
+    <string name="login_error">Login error</string>
+    <string name="network_error">Network error</string>
 </resources>

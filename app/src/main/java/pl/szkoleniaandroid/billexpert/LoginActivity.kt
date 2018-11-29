@@ -1,13 +1,16 @@
 package pl.szkoleniaandroid.billexpert
 
-import android.os.AsyncTask
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Handler
 import android.preference.PreferenceManager
 import android.util.Log
 import android.view.View
+import android.widget.ProgressBar
+import android.widget.Toast
 import androidx.databinding.*
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import com.google.android.material.textfield.TextInputLayout
 import okhttp3.OkHttpClient
@@ -37,9 +40,24 @@ class LoginActivity : AppCompatActivity() {
         )
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_login)
-        binding.viewmodel = LoginViewModel(
+        val loginViewModel = LoginViewModel(
             sessionRepository
         )
+        binding.viewmodel = loginViewModel
+        loginViewModel.goToBillsLiveData.observe(this, Observer<Event<Unit>> {
+
+            if (!it.consumed) {
+                it.consume()
+                startActivity(Intent(this, BillsActivity::class.java))
+                finish()
+            }
+        })
+        loginViewModel.showErrorLiveData.observe(this, Observer<Event<Int>> {
+            if (!it.consumed) {
+                val errorId = it.consume()!!
+                Toast.makeText(this, errorId, Toast.LENGTH_SHORT).show()
+            }
+        })
     }
 }
 
@@ -50,6 +68,9 @@ class LoginViewModel(private val sessionRepository: SessionRepository) : ViewMod
     var password = ObservableString("pass")
     val passwordError = ObservableInt(0)
     val inProgress = ObservableBoolean(false)
+
+    val goToBillsLiveData = MutableLiveData<Event<Unit>>()
+    val showErrorLiveData = MutableLiveData<Event<Int>>()
 
 
 //    var task: AsyncTask<String, Int, Boolean>? = null
@@ -88,6 +109,8 @@ class LoginViewModel(private val sessionRepository: SessionRepository) : ViewMod
 
     private fun login(username: String, password: String) {
 
+        inProgress.set(true)
+
         val interceptor = HttpLoggingInterceptor()
         interceptor.level = HttpLoggingInterceptor.Level.BODY
 
@@ -107,6 +130,8 @@ class LoginViewModel(private val sessionRepository: SessionRepository) : ViewMod
 
         call.enqueue(object : Callback<LoginResponse> {
             override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
+                showErrorLiveData.value = Event(R.string.network_error)
+                inProgress.set(false)
             }
 
             override fun onResponse(call: Call<LoginResponse>, response: Response<LoginResponse>) {
@@ -116,10 +141,15 @@ class LoginViewModel(private val sessionRepository: SessionRepository) : ViewMod
                     sessionRepository.saveUser(body.objectId, body.sessionToken)
 
                     //GO TO BILLS!!
+
+                    goToBillsLiveData.value = Event(Unit)
+                    inProgress.set(false)
                 } else {
 
 
                     val error = response.errorBody()
+                    showErrorLiveData.value = Event(R.string.login_error)
+                    inProgress.set(false)
                 }
             }
 
@@ -169,4 +199,9 @@ fun intErrorAdapter(view: TextInputLayout, errorId: Int) {
     } else {
         view.error = view.context.getString(errorId)
     }
+}
+
+@BindingAdapter("visible")
+fun visible(view: ProgressBar, visible: Boolean) {
+    view.visibility = if(visible) View.VISIBLE else View.GONE
 }

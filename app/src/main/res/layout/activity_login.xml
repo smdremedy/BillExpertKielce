@@ -10,65 +10,77 @@
 
     <ScrollView android:layout_width="match_parent" android:layout_height="match_parent">
 
+        <FrameLayout android:layout_width="match_parent" android:layout_height="wrap_content">
 
-        <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                tools:context=".LoginActivity"
-                android:orientation="vertical">
 
-            <ImageView android:src="@drawable/top"
-                       android:adjustViewBounds="true"
-                       android:background="@color/colorPrimary"
-                       android:layout_marginBottom="40dp"
-                       android:layout_width="match_parent"
-                       android:layout_height="wrap_content"/>
-
-            <com.google.android.material.textfield.TextInputLayout
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.WithMargins"
-                    android:id="@+id/usernameLayout"
-                    app:error="@{viewmodel.usernameError}"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-
-                <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/usernameEditText"
-                        android:hint="@string/username"
-                        android:singleLine="true"
-                        android:text="@={viewmodel.username}"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"/>
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.WithMargins"
-                    android:layout_width="match_parent"
-                    app:error="@{viewmodel.passwordError}"
-                    android:layout_height="wrap_content">
-
-                <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/passwordEditText"
-                        android:hint="@string/password"
-                        android:singleLine="true"
-                        android:text="@={viewmodel.password}"
-                        android:inputType="textPassword"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"/>
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <Button style="@style/Widget.AppCompat.Button.Colored"
-                    android:layout_marginStart="@dimen/horizontal_margin"
-                    android:layout_marginEnd="@dimen/horizontal_margin"
-                    android:enabled="@{!viewmodel.inProgress}"
-                    android:onClick="@{()->viewmodel.signInClicked()}"
+            <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:id="@+id/signInButton"
-                    android:text="@string/sign_in"/>
+                    tools:context=".LoginActivity"
+                    android:orientation="vertical">
+
+                <ImageView android:src="@drawable/top"
+                           android:adjustViewBounds="true"
+                           android:background="@color/colorPrimary"
+                           android:layout_marginBottom="40dp"
+                           android:layout_width="match_parent"
+                           android:layout_height="wrap_content"/>
+
+                <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.WithMargins"
+                        android:id="@+id/usernameLayout"
+                        app:enabled="@{!viewmodel.inProgress}"
+                        app:error="@{viewmodel.usernameError}"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/usernameEditText"
+                            android:hint="@string/username"
+                            android:singleLine="true"
+                            android:text="@={viewmodel.username}"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"/>
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.WithMargins"
+                        android:layout_width="match_parent"
+                        app:enabled="@{!viewmodel.inProgress}"
+                        app:error="@{viewmodel.passwordError}"
+                        android:layout_height="wrap_content">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/passwordEditText"
+                            android:hint="@string/password"
+                            android:singleLine="true"
+                            android:text="@={viewmodel.password}"
+                            android:inputType="textPassword"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"/>
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <Button style="@style/Widget.AppCompat.Button.Colored"
+                        android:layout_marginStart="@dimen/horizontal_margin"
+                        android:layout_marginEnd="@dimen/horizontal_margin"
+                        android:enabled="@{!viewmodel.inProgress}"
+                        android:onClick="@{()->viewmodel.signInClicked()}"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/signInButton"
+                        android:text="@string/sign_in"/>
 
 
-        </LinearLayout>
+            </LinearLayout>
+
+            <ProgressBar android:layout_width="200dp"
+                         app:visible="@{viewmodel.inProgress}"
+                         android:layout_gravity="center"
+                         android:layout_height="200dp"
+            />
+        </FrameLayout>
+
     </ScrollView>
 </layout>
