@@ -24,6 +24,18 @@ interface BillApi {
     )
     @GET("classes/Bill")
     fun getBills(@Header("X-Parse-Session-Token") token: String): Call<BillsResponse>
+
+
+    @Headers(
+        "X-Parse-Application-Id: RRQfzogXeuQI2VzK0bqEgn02IElfm3ifCUf1lNQX",
+        "X-Parse-REST-API-Key: mt4btJUcnmVaEJGzncHqkogm0lDM3n2185UNSjiX"
+    )
+    @POST("classes/Bill")
+    fun postBill(@Header("X-Parse-Session-Token") token: String, @Body bill: Bill) : Call<PostBillResponse>
+}
+
+class PostBillResponse {
+
 }
 
 data class BillsResponse(

@@ -5,10 +5,13 @@ import android.os.Bundle
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ObservableBoolean
 import androidx.databinding.ObservableField
+import androidx.databinding.ObservableInt
 import androidx.lifecycle.ViewModel
 import pl.szkoleniaandroid.billexpert.api.Bill
+import pl.szkoleniaandroid.billexpert.api.BillApi
 import pl.szkoleniaandroid.billexpert.api.Category
 import pl.szkoleniaandroid.billexpert.databinding.ActivityDetailsBinding
+import pl.szkoleniaandroid.billexpert.session.SessionRepository
 import timber.log.Timber
 import java.util.*
 
@@ -20,7 +23,7 @@ class DetailsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_details)
 
-        binding.viewmodel = DetailsViewModel()
+        binding.viewmodel = DetailsViewModel(getBillApi(), sessionRepository)
         val bill = intent.getSerializableExtra("bill")
                 as Bill?
 
@@ -28,7 +31,10 @@ class DetailsActivity : AppCompatActivity() {
 }
 
 
-class DetailsViewModel : ViewModel() {
+class DetailsViewModel(
+    private val billApi: BillApi,
+    private val sessionRepository: SessionRepository
+) : ViewModel() {
     val userId = ObservableField<String>("")
     val date = ObservableField<Date>(Date())
     val name = ObservableField<String>("")
@@ -38,4 +44,14 @@ class DetailsViewModel : ViewModel() {
     val objectId = ObservableField<String>("")
     val categories = Category.values().toList()
     val isChecked = ObservableBoolean(false)
+    val selectedCategoryIndex = ObservableInt(0)
+
+    fun save() {
+
+//        val bill = Bill(
+//            sessionRepository.getUserId(),
+//
+//        )
+
+    }
 }

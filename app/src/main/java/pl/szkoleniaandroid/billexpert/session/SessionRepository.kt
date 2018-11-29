@@ -7,6 +7,7 @@ interface SessionRepository {
     fun saveUser(userId: String, token: String)
 
     fun getToken(): String
+    fun getUserId(): String
 
     fun isLoggedIn(): Boolean
     fun removeUser()
@@ -29,6 +30,10 @@ class SharedPrefsSessionRepository(private val sharedPreferences: SharedPreferen
 
     override fun getToken(): String {
         return sharedPreferences.getString(TOKEN_KEY, "")!!
+    }
+
+    override fun getUserId(): String {
+        return sharedPreferences.getString(USER_ID_KEY, "")!!
     }
 
     override fun isLoggedIn(): Boolean {

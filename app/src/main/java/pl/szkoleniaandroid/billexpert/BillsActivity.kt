@@ -37,7 +37,6 @@ interface OnBillClicked {
 
 class BillsActivity : AppCompatActivity() {
 
-    private lateinit var sessionRepository: SessionRepository
 
     lateinit var binding: ActivityBillsBinding
     val billsAdapter = BillsAdapter()
@@ -47,9 +46,6 @@ class BillsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        sessionRepository = SharedPrefsSessionRepository(
-            android.preference.PreferenceManager.getDefaultSharedPreferences(applicationContext)
-        )
 
 
 

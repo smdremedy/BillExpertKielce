@@ -52,6 +52,7 @@
 
         <Spinner android:id="@+id/category_spinner"
                  android:entries="@{viewmodel.categories}"
+                 android:selectedItemPosition="@={viewmodel.selectedCategoryIndex}"
                  app:layout_constraintTop_toBottomOf="@id/amount_date_layout"
                  android:layout_width="match_parent" android:layout_height="wrap_content"></Spinner>
 
@@ -63,7 +64,7 @@
 
         <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/comment_layout"
-                visible="@{viewmodel.isChecked}"
+                visible="@{safeUnbox(viewmodel.isChecked)}"
                 app:layout_constraintTop_toBottomOf="@id/has_comment_check_box"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.WithMargins"
                 android:layout_width="match_parent"
@@ -77,6 +78,8 @@
         <Button
                 app:layout_constraintBottom_toBottomOf="parent"
                 android:id="@+id/save_button"
+                android:text="Add Bill"
+                android:onClick="@{()->viewmodel.save()}"
                 android:layout_width="match_parent" android:layout_height="wrap_content"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
