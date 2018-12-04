@@ -1,5 +1,6 @@
 package pl.szkoleniaandroid.billexpert
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.preference.PreferenceManager
@@ -35,6 +36,8 @@ interface OnBillClicked {
 }
 
 
+const val REQUEST_CODE_ADD_BILL = 123
+
 class BillsActivity : AppCompatActivity() {
 
 
@@ -47,22 +50,22 @@ class BillsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
 
-
-
         if (sessionRepository.isLoggedIn()) {
             binding = DataBindingUtil.setContentView(this, R.layout.activity_bills)
             setSupportActionBar(toolbar)
 
             fab.setOnClickListener { view ->
-               goToAdd()
+                goToAdd()
             }
             viewModel = BillsViewModel()
             viewModel.showBillLiveData.observe(this, Observer {
-                if(!it.consumed) {
+                if (!it.consumed) {
                     val bill = it.consume()
                     //TODO show bill
-                    val intent = Intent(this,
-                        DetailsActivity::class.java)
+                    val intent = Intent(
+                        this,
+                        DetailsActivity::class.java
+                    )
                     intent.putExtra("bill", bill)
                     startActivity(intent)
                 }
@@ -79,9 +82,21 @@ class BillsActivity : AppCompatActivity() {
     }
 
     private fun goToAdd() {
-        val intent = Intent(this,
-            DetailsActivity::class.java)
-        startActivity(intent)
+        val intent = Intent(
+            this,
+            DetailsActivity::class.java
+        )
+        startActivityForResult(intent, REQUEST_CODE_ADD_BILL)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == REQUEST_CODE_ADD_BILL) {
+            if(resultCode == Activity.RESULT_OK) {
+                refreshBills()
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data)
+        }
     }
 
     private fun goToLogin() {
@@ -173,7 +188,7 @@ class BillsViewModel : ViewModel() {
 
     val bills = ObservableArrayList<Bill>()
     val itemBinding = ItemBinding.of<Bill>(BR.item, R.layout.bill_item)
-        .bindExtra(BR.listener, object: OnBillClicked {
+        .bindExtra(BR.listener, object : OnBillClicked {
             override fun billClicked(bill: Bill) {
                 showBillLiveData.value = Event(bill)
             }

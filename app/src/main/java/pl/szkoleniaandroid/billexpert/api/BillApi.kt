@@ -34,7 +34,9 @@ interface BillApi {
     fun postBill(@Header("X-Parse-Session-Token") token: String, @Body bill: Bill) : Call<PostBillResponse>
 }
 
-class PostBillResponse {
+class PostBillResponse(
+    val objectId: String
+) {
 
 }
 
