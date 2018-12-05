@@ -10,6 +10,7 @@ import androidx.databinding.ObservableField
 import androidx.databinding.ObservableInt
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import org.koin.android.ext.android.get
 import pl.szkoleniaandroid.billexpert.api.Bill
 import pl.szkoleniaandroid.billexpert.api.BillApi
 import pl.szkoleniaandroid.billexpert.api.Category
@@ -31,7 +32,7 @@ class DetailsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_details)
 
-        binding.viewmodel = DetailsViewModel(getBillApi(), sessionRepository)
+        binding.viewmodel = DetailsViewModel(get(), get())
         binding.viewmodel?.finishedLiveData?.observe(this, androidx.lifecycle.Observer {
             if (!it.consumed) {
                 val bill = it.consume()

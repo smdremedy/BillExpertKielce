@@ -9,12 +9,12 @@ import android.view.View
 import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.databinding.*
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.*
 import com.google.android.material.textfield.TextInputLayout
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import org.koin.android.ext.android.get
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import pl.szkoleniaandroid.billexpert.api.BillApi
 import pl.szkoleniaandroid.billexpert.api.LoginResponse
 import pl.szkoleniaandroid.billexpert.databinding.ActivityLoginBinding
@@ -33,6 +33,8 @@ class LoginActivity : AppCompatActivity() {
 
     lateinit var binding: ActivityLoginBinding
 
+    val loginViewModel: LoginViewModel by viewModel()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val sessionRepository = SharedPrefsSessionRepository(
@@ -42,10 +44,17 @@ class LoginActivity : AppCompatActivity() {
         binding = DataBindingUtil.setContentView(this, R.layout.activity_login)
 
 
+//        val loginViewModel = ViewModelProviders.of(this, object : ViewModelProvider.Factory {
+//            override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+//                return LoginViewModel(get(), get()) as T
+//            }
+//
+//        }).get(LoginViewModel::class.java)
+        Timber.d("LVM:" + loginViewModel)
 
-        val loginViewModel = LoginViewModel(
-            sessionRepository, getBillApi()
-        )
+//            LoginViewModel(
+//            sessionRepository, get()
+//        )
         binding.viewmodel = loginViewModel
         loginViewModel.goToBillsLiveData.observe(this, Observer<Event<Unit>> {
 

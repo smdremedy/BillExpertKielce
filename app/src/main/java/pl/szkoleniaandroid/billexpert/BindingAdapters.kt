@@ -6,7 +6,7 @@ import com.squareup.picasso.Picasso
 
 
 @BindingAdapter("imageUrl")
-fun imageUrl(view: ImageView, url: String) {
+fun imageUrl(view: ImageView, url: String?) {
 
     Picasso.get().load(url).into(view)
 

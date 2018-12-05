@@ -15,7 +15,7 @@
 
         <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/bills_recycler_view"
-                items="@{viewmodel.bills}"
+                items="@{viewmodel.billsLiveData}"
                 itemBinding="@{viewmodel.itemBinding}"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 android:layout_width="match_parent"

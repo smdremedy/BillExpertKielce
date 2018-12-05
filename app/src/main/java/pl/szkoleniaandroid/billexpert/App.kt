@@ -3,11 +3,18 @@ package pl.szkoleniaandroid.billexpert
 import android.app.Application
 import android.preference.PreferenceManager
 import androidx.appcompat.app.AppCompatActivity
+import androidx.room.Room
+import com.facebook.stetho.Stetho
+import com.facebook.stetho.okhttp3.StethoInterceptor
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.adapters.Rfc3339DateJsonAdapter
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import org.koin.android.ext.android.startKoin
 import pl.szkoleniaandroid.billexpert.api.BillApi
+import pl.szkoleniaandroid.billexpert.db.BillDao
+import pl.szkoleniaandroid.billexpert.db.BillDatabase
+import pl.szkoleniaandroid.billexpert.di.appModule
 import pl.szkoleniaandroid.billexpert.session.SessionRepository
 import pl.szkoleniaandroid.billexpert.session.SharedPrefsSessionRepository
 import retrofit2.Retrofit
@@ -17,41 +24,15 @@ import java.util.*
 
 class App : Application() {
 
-    lateinit var billApi: BillApi
-    lateinit var sessionRepository: SessionRepository
-
     override fun onCreate() {
         super.onCreate()
 
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
+            Stetho.initializeWithDefaults(this)
         }
 
-        val interceptor = HttpLoggingInterceptor()
-        interceptor.level = HttpLoggingInterceptor.Level.BODY
-
-        val client = OkHttpClient.Builder()
-            .addInterceptor(interceptor)
-            .build()
-
-        val moshi = Moshi.Builder()
-            .add(Date::class.java, Rfc3339DateJsonAdapter())
-            .build()
-
-        val retrofit: Retrofit = Retrofit.Builder()
-            .baseUrl("https://parseapi.back4app.com")
-            .addConverterFactory(MoshiConverterFactory.create(moshi))
-            .client(client)
-            .build()
-
-        billApi = retrofit.create(BillApi::class.java)
-
-        sessionRepository = SharedPrefsSessionRepository(
-            PreferenceManager.getDefaultSharedPreferences(applicationContext)
-        )
+        startKoin(this, listOf(appModule))
 
     }
 }
-
-val AppCompatActivity.sessionRepository
-    get() = (this.application as App).sessionRepository

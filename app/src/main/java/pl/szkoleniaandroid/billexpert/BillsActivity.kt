@@ -12,24 +12,34 @@ import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ObservableArrayList
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.*
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
 import kotlinx.android.synthetic.main.activity_bills.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import me.tatarka.bindingcollectionadapter2.ItemBinding
+import org.koin.android.ext.android.get
+import org.koin.android.ext.android.inject
 import pl.szkoleniaandroid.billexpert.api.Bill
+import pl.szkoleniaandroid.billexpert.api.BillApi
 import pl.szkoleniaandroid.billexpert.api.BillsResponse
+import pl.szkoleniaandroid.billexpert.api.Category
 import pl.szkoleniaandroid.billexpert.databinding.ActivityBillsBinding
 import pl.szkoleniaandroid.billexpert.databinding.BillItemBinding
+import pl.szkoleniaandroid.billexpert.db.BillDao
+import pl.szkoleniaandroid.billexpert.db.BillDto
 import pl.szkoleniaandroid.billexpert.session.SessionRepository
 import pl.szkoleniaandroid.billexpert.session.SharedPrefsSessionRepository
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import timber.log.Timber
+import java.util.*
 
 interface OnBillClicked {
     fun billClicked(bill: Bill)
@@ -46,6 +56,8 @@ class BillsActivity : AppCompatActivity() {
 
     lateinit var viewModel: BillsViewModel
 
+    val sessionRepository: SessionRepository by inject()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -57,7 +69,8 @@ class BillsActivity : AppCompatActivity() {
             fab.setOnClickListener { view ->
                 goToAdd()
             }
-            viewModel = BillsViewModel()
+            viewModel = BillsViewModel(get(), sessionRepository)
+
             viewModel.showBillLiveData.observe(this, Observer {
                 if (!it.consumed) {
                     val bill = it.consume()
@@ -75,6 +88,7 @@ class BillsActivity : AppCompatActivity() {
 //            binding.billsContent.billsRecyclerView.layoutManager = LinearLayoutManager(this)
 
             binding.viewmodel = viewModel
+            binding.setLifecycleOwner(this)
 
         } else {
             goToLogin()
@@ -91,7 +105,7 @@ class BillsActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == REQUEST_CODE_ADD_BILL) {
-            if(resultCode == Activity.RESULT_OK) {
+            if (resultCode == Activity.RESULT_OK) {
                 refreshBills()
             }
         } else {
@@ -130,7 +144,7 @@ class BillsActivity : AppCompatActivity() {
 
     private fun refreshBills() {
 
-        val call = getBillApi().getBills(sessionRepository.getToken())
+        val call = get<BillApi>().getBills(sessionRepository.getToken())
         call.enqueue(object : Callback<BillsResponse> {
             override fun onFailure(call: Call<BillsResponse>, t: Throwable) {
             }
@@ -141,9 +155,48 @@ class BillsActivity : AppCompatActivity() {
                     billsResponse.results.forEach { bill ->
                         Timber.d(bill.toString())
                     }
-                    viewModel.bills.clear()
-                    viewModel.bills.addAll(billsResponse.results)
+
                     //billsAdapter.setData(billsResponse.results)
+
+                    GlobalScope.launch(context = Dispatchers.IO) {
+
+                        val billDtos: List<BillDto> = billsResponse.results.map {
+                            return@map BillDto().apply {
+                                objectId = it.objectId
+                                userId = it.userId
+                                date = it.date
+                                name = it.name
+                                amount = it.amount
+                                category = it.category
+                                comment = it.comment
+                            }
+                        }.toList()
+
+                        get<BillDao>().insert(billDtos)
+
+
+//                        val bills = billDao.getBills(sessionRepository.getUserId())
+//
+//                        val billsToDisply = bills.map {
+//                            Bill(
+//                                userId = it.userId,
+//                                date = it.date,
+//                                name = it.name,
+//                                amount = it.amount,
+//                                category = it.category,
+//                                comment = it.comment,
+//                                objectId = it.objectId
+//                            )
+//                        }
+//                        withContext(Dispatchers.Main) {
+//                            viewModel.bills.clear()
+//                            viewModel.bills.addAll(billsToDisply)
+//                        }
+//
+
+
+                    }
+
                 }
             }
 
@@ -182,11 +235,31 @@ class ViewHolder(val binding: BillItemBinding) : RecyclerView.ViewHolder(binding
 
 }
 
-class BillsViewModel : ViewModel() {
+class BillsViewModel(
+    private val billDao: BillDao,
+    private val sessionRepository: SessionRepository
+) : ViewModel() {
 
     val showBillLiveData = MutableLiveData<Event<Bill>>()
 
     val bills = ObservableArrayList<Bill>()
+    val billsLiveData: LiveData<List<Bill>> =
+        Transformations.map(billDao.getBills(sessionRepository.getUserId())) { billDtos ->
+            val billsToDisply = billDtos.map {
+                Bill(
+                    userId = it.userId,
+                    date = it.date,
+                    name = it.name,
+                    amount = it.amount,
+                    category = it.category,
+                    comment = it.comment,
+                    objectId = it.objectId
+                )
+            }
+            return@map billsToDisply
+        }
+
+
     val itemBinding = ItemBinding.of<Bill>(BR.item, R.layout.bill_item)
         .bindExtra(BR.listener, object : OnBillClicked {
             override fun billClicked(bill: Bill) {

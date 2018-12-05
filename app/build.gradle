@@ -14,6 +14,11 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = ["room.schemaLocation": "$projectDir/schemas".toString()]
+            }
+        }
     }
 
     dataBinding.enabled = true
@@ -40,7 +45,15 @@ dependencies {
     implementation 'com.jakewharton.timber:timber:4.7.1'
     implementation 'com.squareup.moshi:moshi-adapters:1.7.0'
     implementation 'com.squareup.picasso:picasso:2.71828'
-
+    def room_version = "2.1.0-alpha02"
+    implementation "androidx.room:room-runtime:$room_version"
+    kapt "androidx.room:room-compiler:$room_version"
     implementation 'me.tatarka.bindingcollectionadapter2:bindingcollectionadapter:3.0.0-beta3'
     implementation 'me.tatarka.bindingcollectionadapter2:bindingcollectionadapter-recyclerview:3.0.0-beta3'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.0.1'
+    implementation 'com.facebook.stetho:stetho:1.5.0'
+    implementation 'com.facebook.stetho:stetho-okhttp3:1.5.0'
+
+    implementation 'org.koin:koin-android:1.0.1'
+    implementation 'org.koin:koin-androidx-viewmodel:1.0.1'
 }
